@@ -1,0 +1,308 @@
+---
+title: "Bihar Assembly Election Analysis"
+output: 
+  flexdashboard::flex_dashboard:
+    orientation: columns
+    social: menu
+---
+
+```{r setup, include=FALSE}
+packages <- c("plotly","readxl","flexdashboard","dplyr","ggplot2","sf","tmap","readr","DT","ggridges","ggthemes")
+if(!require(packages)){
+    install.packages(packages)
+}
+
+library(flexdashboard)
+library(ggplot2)
+library(plotly)
+library(dplyr)
+#library(magrittr)
+#library(cartography)
+library(sf)
+#library(haven)
+
+#loading the Bihar Assambly Election Data
+
+
+#read_csv("bihar-elec-data.csv")
+library(readxl)
+dataset<- read_excel("data/src/Bihar Assembly Election 2020 cleaned.xls")
+#str(dataset)
+#head(dataset)
+#View(dataset)
+
+#Dataset of all the candidates
+dataset2 <-dataset %>% filter(dataset$`STATE/UT NAME`==dataset[[1]][1])
+#str(dataset2)
+#head(dataset2)
+#View(dataset2)
+
+#Dataset without NOTA
+dataset3 <- dataset2 %>% filter(dataset2$PARTY !="NOTA")
+#str(dataset3)
+#head(dataset3)
+#View(dataset3)
+
+#Dataset without Independent candidate and NOTA
+dataset4 <- dataset3 %>% filter(dataset3$PARTY !="IND")
+#str(dataset4)
+#head(dataset4)
+#View(dataset4)
+
+#Winning Candidates data
+win_data_temp <- dataset3 %>% group_by(`AC NO.`) %>% filter(TOTAL==max(TOTAL))
+colnames(win_data_temp)[colnames(win_data_temp)=="AC NO."]<-"AC_NO"
+colnames(win_data_temp)[colnames(win_data_temp)=="CANDIDATE NAME"]<-"CANDIDATE_NAME"
+
+```
+ 
+ 
+ 
+Interactive Maps
+============================================================================
+  
+Column {data-width=1000}
+---------------------------------------------------------------------------
+
+```{r, echo=FALSE,include=T,message=FALSE,error=F,warning=F}
+
+shape_data<-read_sf("Shape file/INDIA_AC.shp")
+Bihar_shape_data<- shape_data %>% filter(shape_data$ST_CODE==10)
+#View(Bihar_shape_data)
+
+mapdata<-merge(Bihar_shape_data, win_data_temp, by="AC_NO")
+#View(mapdata)
+#names(mapdata)
+#mapdata=View(mapdata)
+#write.csv2(mapdata,"d.csv")
+```
+
+```{r, echo=FALSE,include=T,message=FALSE,error=F,warning=F}
+#library(tmaptools)
+pal=c("#05980D","#EE7B06","#CA4741","#EA3606","#E50505","#E72415","#AA6D6D",
+      "#E5E5E5","#BC06C5","#8456C5","#737373","#0B461E","#1A1A1A")
+
+#Map code----------------------------------------------------------------
+#library
+library(tmap)
+
+#Intering Interective mode------------------------------------------------
+tmap_mode("view")
+
+#District Layer
+Bihar_assembly_map<-tm_shape(mapdata)+
+  #tm_fill(col =  "PARTY", alpha=1, palette = "Reds", legend.show = F)+
+  tm_borders(col="black",lwd=1,alpha = 1)+
+  tm_fill(id="AC NAME", col =  "PARTY", alpha=1, palette = pal, legend.show = T,
+          popup.vars = c("AC NAME", "CANDIDATE_NAME", "SEX","AGE", "CATEGORY",
+                         "PARTY", "% VOTES POLLED" ))+tm_text("AC NAME")+
+  #tm_layout(style="cat", aes.palette = "Reds", aes.color = "Reds" )+
+  #other customization
+  #tm_borders(col="white",lwd=0.2)+
+  tm_layout(frame = T, outer.margins = 0, inner.margins = 0)+
+  #tm_style("cobalt")+
+  tm_view(set.view = 8, alpha = 0.9, set.zoom.limits=c(7,11),view.legend.position=c("left","bottom") )
+```
+
+```{r, echo=FALSE,include=T,message=FALSE,error=F,warning=F}
+Bihar_assembly_map
+```
+
+Winning Candidates
+=========================================================================
+
+
+Column {data-width=1000}
+-----------------------------------------------------------------------
+
+### Winning Candidates data
+
+```{r}
+#Winning Candidates data
+win_data_temp <- dataset3 %>% group_by(`AC NO.`) %>% filter(TOTAL==max(TOTAL))
+colnames(win_data_temp)[colnames(win_data_temp)=="AC NO."]<-"AC_NO"
+colnames(win_data_temp)[colnames(win_data_temp)=="CANDIDATE NAME"]<-"CANDIDATE_NAME"
+win_data_temp = as.data.frame(win_data_temp)
+DT::datatable(win_data_temp)
+```
+
+Data Summary
+=======================================================================
+
+Columns {data-width=333}
+-----------------------------------------------------------------------
+
+### Number of Candidates Fielded by Canstituency
+
+```{r}
+#Number of Candidates Fielded by Canstituency
+AC_cand = table(dataset3$`AC NAME`)
+AC_cand = as.data.frame(AC_cand)
+DT::datatable(AC_cand)
+```
+
+Columns {data-width=333}
+-----------------------------------------------------------------------
+### Number Of Candidates Fielded Party wise
+```{r}
+#Number Of Candidates Fielded Party wise
+DT::datatable(as.data.frame(table(dataset3$PARTY)))
+```
+
+### Winning Candidates party wise
+```{r}
+#Winning Candidates party wise
+DT::datatable(as.data.frame(table(win_data_temp$PARTY)))
+```
+
+Columns {data-width=333}
+-----------------------------------------------------------------------
+### Female winning candidates
+```{r}
+#Gender wie and partywise winning candidates
+#FEMALES
+win_data_temp_w <- win_data_temp %>% group_by(PARTY) %>% filter(SEX=="FEMALE")
+DT::datatable(as.data.frame(table(win_data_temp_w$PARTY)))
+```
+
+### Male winning candidates
+```{r}
+#MALES
+win_data_temp_m <- win_data_temp %>% group_by(PARTY) %>% filter(SEX=="MALE")
+DT::datatable(as.data.frame(table(win_data_temp_m$PARTY)))
+
+```
+
+### Winning candidates Gender Wise
+```{r}
+#Winning candidates Gender Wise
+table(win_data_temp$SEX)
+```
+
+### Winning Candidates Catagory wise
+```{r}
+#Winning Candidates Catagory wise
+table(win_data_temp$CATEGORY)
+```
+
+Plots
+=======================================================================
+Column {data-width=333}
+-----------------------------------------------------------------------
+
+### Catagory wise plot
+```{r}
+#Catagory wise plot
+p1 <- ggplot(dataset3, aes(x = CATEGORY, y = ..count../sum(..count..) )) +
+  geom_bar()+
+  labs(x="Catagory",title="Bihar Assembly Election Candidates By Catagory.",y="Percentage Of Candidates")+
+  scale_y_continuous(labels=scales::percent)
+
+ggplotly(p1)
+
+```
+
+### Gender Wise plot
+```{r}
+#Gender Wise plot
+p2 <- ggplot(dataset3, aes(x = SEX,y = ..count../sum(..count..), fill=CATEGORY))+
+  geom_bar(color="brown")+
+  labs(x="Gender",title="Bihar Assembly Election Candidates By Gender.",y="Percentage Of Candidates")
+
+ggplotly(p2)
+```
+
+Column {data-width=333}
+-----------------------------------------------------------------------
+### Age distribution Gender wise
+
+```{r}
+#Age distribution Gender wise
+p3 <- ggplot(dataset3, aes(x = SEX, y = AGE) )+
+  geom_boxplot()
+
+ggplotly(p3)
+
+```
+
+### Age distribution category wise
+```{r}
+#Age distribution category wise
+p4 <- ggplot(dataset3, aes(x=CATEGORY, y=AGE))+
+  geom_boxplot()
+
+ggplotly(p4)
+
+```
+
+Column {data-width=333}
+-----------------------------------------------------------------------
+
+### Age distribution of big parties (Boxplot)
+
+```{r}
+#Age distribution of big parties (Boxplot)
+Big_party_data <- filter(dataset3, dataset3$PARTY %in% c("BJP","JD(U)","RJD","INC","LJP","IND"))
+p5 <- ggplot(Big_party_data,aes(x=PARTY,y=AGE))+ 
+  geom_boxplot()
+ggplotly(p5)
+```
+
+### Age Distribution Of Big Parties (ridgesdensity plot)
+
+```{r, echo=FALSE,include=T,message=FALSE,error=F,warning=F}
+#Age Distribution Of Big Parties (ridgesdensity plot)
+library(ggridges)
+p6 <- ggplot(Big_party_data,aes(x=AGE,y=PARTY,fill=PARTY))+ 
+  geom_density_ridges()+
+  theme_ridges()
+p6
+```
+
+
+
+
+Static maps
+=======================================================================
+
+
+Columns {data-width=500}
+-----------------------------------------------------------------------------
+
+### Male and Female Candidates
+
+```{r}
+map_a <-ggplot(mapdata) +
+ aes(fill = SEX) +
+ geom_sf(shape = "circle", size = 0.5) +
+ scale_fill_brewer(palette = "RdGy", 
+ direction = 1) +
+ labs(title = "Bihar Assembly Election Result", subtitle = "Assembly Election 2020", 
+ caption = "data source:https://eci.gov.in/files/file/12787-bihar-legislative-election-2020", fill = "Male and Female Candidates") +
+ ggthemes::theme_economist() +
+ theme(plot.caption = element_text(face = "italic"))
+
+map_a
+```
+
+Columns {data-width=500}
+-----------------------------------------------------------------------------
+
+### Winning Candidates Party Wise
+
+```{r}
+map_b <- ggplot(mapdata) +
+ aes(fill = PARTY) +
+ geom_sf(shape = "circle", size = 0.5) +
+ scale_fill_manual(values = c(AIMIM = "#05980D", 
+BJP = "#EE7B06", BSP = "#CA4741", CPI = "#EA3606", `CPI(ML)(L)` = "#E50505", CPIM = "#E72415", HAMS = "#AA6D6D", 
+INC = "#E5E5E5", IND = "#BC06C5", `JD(U)` = "#8456C5", LJP = "#737373", RJD = "#0B461E", VSIP = "#1A1A1A"
+)) +
+ labs(title = "Bihar Assembly Election Result", subtitle = "Winning Candidates Party Wise", caption = "data source:https://eci.gov.in/files/file/12787-bihar-legislative-election-2020", 
+ fill = "Party") +
+ theme_minimal() +
+ theme(plot.caption = element_text(face = "italic"))
+
+map_b
+```
+
