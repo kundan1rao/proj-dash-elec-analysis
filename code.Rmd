@@ -55,16 +55,12 @@ colnames(win_data_temp)[colnames(win_data_temp)=="AC NO."]<-"AC_NO"
 colnames(win_data_temp)[colnames(win_data_temp)=="CANDIDATE NAME"]<-"CANDIDATE_NAME"
 
 ```
- 
- 
- 
-Interactive Maps
-============================================================================
-  
-Column {data-width=1000}
----------------------------------------------------------------------------
 
-```{r, echo=FALSE,include=T,message=FALSE,error=F,warning=F}
+# Interactive Maps
+
+## Column {data-width="1000"}
+
+```{r, echo=FALSE}
 
 shape_data<-read_sf("Shape file/INDIA_AC.shp")
 Bihar_shape_data<- shape_data %>% filter(shape_data$ST_CODE==10)
@@ -77,7 +73,7 @@ mapdata<-merge(Bihar_shape_data, win_data_temp, by="AC_NO")
 #write.csv2(mapdata,"d.csv")
 ```
 
-```{r, echo=FALSE,include=T,message=FALSE,error=F,warning=F}
+```{r, echo=FALSE}
 #library(tmaptools)
 pal=c("#05980D","#EE7B06","#CA4741","#EA3606","#E50505","#E72415","#AA6D6D",
       "#E5E5E5","#BC06C5","#8456C5","#737373","#0B461E","#1A1A1A")
@@ -104,33 +100,30 @@ Bihar_assembly_map<-tm_shape(mapdata)+
   tm_view(set.view = 8, alpha = 0.9, set.zoom.limits=c(7,11),view.legend.position=c("left","bottom") )
 ```
 
-```{r, echo=FALSE,include=T,message=FALSE,error=F,warning=F}
+```{r interective-map, echo=FALSE, message=FALSE, warning=FALSE,out.width="100%", out.height="100%"}
 Bihar_assembly_map
 ```
 
-Winning Candidates
-=========================================================================
+# Winning Candidates
 
-
-Column {data-width=1000}
------------------------------------------------------------------------
+## Column {data-width="1000"}
 
 ### Winning Candidates data
 
-```{r}
+```{r,echo=F,out.width="100%",out.height="100%"}
 #Winning Candidates data
 win_data_temp <- dataset3 %>% group_by(`AC NO.`) %>% filter(TOTAL==max(TOTAL))
 colnames(win_data_temp)[colnames(win_data_temp)=="AC NO."]<-"AC_NO"
 colnames(win_data_temp)[colnames(win_data_temp)=="CANDIDATE NAME"]<-"CANDIDATE_NAME"
 win_data_temp = as.data.frame(win_data_temp)
-DT::datatable(win_data_temp)
+DT::datatable(win_data_temp,options = list(
+  auto = 10, autoWidth = TRUE
+))
 ```
 
-Data Summary
-=======================================================================
+# Data Summary
 
-Columns {data-width=333}
------------------------------------------------------------------------
+## Columns {data-width="333"}
 
 ### Number of Candidates Fielded by Canstituency
 
@@ -141,23 +134,26 @@ AC_cand = as.data.frame(AC_cand)
 DT::datatable(AC_cand)
 ```
 
-Columns {data-width=333}
------------------------------------------------------------------------
+## Columns {data-width="333"}
+
 ### Number Of Candidates Fielded Party wise
+
 ```{r}
 #Number Of Candidates Fielded Party wise
 DT::datatable(as.data.frame(table(dataset3$PARTY)))
 ```
 
 ### Winning Candidates party wise
+
 ```{r}
 #Winning Candidates party wise
 DT::datatable(as.data.frame(table(win_data_temp$PARTY)))
 ```
 
-Columns {data-width=333}
------------------------------------------------------------------------
+## Columns {data-width="333"}
+
 ### Female winning candidates
+
 ```{r}
 #Gender wie and partywise winning candidates
 #FEMALES
@@ -166,6 +162,7 @@ DT::datatable(as.data.frame(table(win_data_temp_w$PARTY)))
 ```
 
 ### Male winning candidates
+
 ```{r}
 #MALES
 win_data_temp_m <- win_data_temp %>% group_by(PARTY) %>% filter(SEX=="MALE")
@@ -174,23 +171,25 @@ DT::datatable(as.data.frame(table(win_data_temp_m$PARTY)))
 ```
 
 ### Winning candidates Gender Wise
+
 ```{r}
 #Winning candidates Gender Wise
 table(win_data_temp$SEX)
 ```
 
 ### Winning Candidates Catagory wise
+
 ```{r}
 #Winning Candidates Catagory wise
 table(win_data_temp$CATEGORY)
 ```
 
-Plots
-=======================================================================
-Column {data-width=333}
------------------------------------------------------------------------
+# Plots
+
+## Column {data-width="333"}
 
 ### Catagory wise plot
+
 ```{r}
 #Catagory wise plot
 p1 <- ggplot(dataset3, aes(x = CATEGORY, y = ..count../sum(..count..) )) +
@@ -203,6 +202,7 @@ ggplotly(p1)
 ```
 
 ### Gender Wise plot
+
 ```{r}
 #Gender Wise plot
 p2 <- ggplot(dataset3, aes(x = SEX,y = ..count../sum(..count..), fill=CATEGORY))+
@@ -212,8 +212,8 @@ p2 <- ggplot(dataset3, aes(x = SEX,y = ..count../sum(..count..), fill=CATEGORY))
 ggplotly(p2)
 ```
 
-Column {data-width=333}
------------------------------------------------------------------------
+## Column {data-width="333"}
+
 ### Age distribution Gender wise
 
 ```{r}
@@ -226,6 +226,7 @@ ggplotly(p3)
 ```
 
 ### Age distribution category wise
+
 ```{r}
 #Age distribution category wise
 p4 <- ggplot(dataset3, aes(x=CATEGORY, y=AGE))+
@@ -235,8 +236,7 @@ ggplotly(p4)
 
 ```
 
-Column {data-width=333}
------------------------------------------------------------------------
+## Column {data-width="333"}
 
 ### Age distribution of big parties (Boxplot)
 
@@ -259,15 +259,9 @@ p6 <- ggplot(Big_party_data,aes(x=AGE,y=PARTY,fill=PARTY))+
 p6
 ```
 
+# Static maps
 
-
-
-Static maps
-=======================================================================
-
-
-Columns {data-width=500}
------------------------------------------------------------------------------
+## Columns {data-width="500"}
 
 ### Male and Female Candidates
 
@@ -285,8 +279,7 @@ map_a <-ggplot(mapdata) +
 map_a
 ```
 
-Columns {data-width=500}
------------------------------------------------------------------------------
+## Columns {data-width="500"}
 
 ### Winning Candidates Party Wise
 
@@ -305,4 +298,3 @@ INC = "#E5E5E5", IND = "#BC06C5", `JD(U)` = "#8456C5", LJP = "#737373", RJD = "#
 
 map_b
 ```
-
