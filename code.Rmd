@@ -7,7 +7,7 @@ output:
 ---
 
 ```{r setup, include=FALSE}
-packages <- c("plotly","readxl","flexdashboard","dplyr","ggplot2","sf","tmap","readr","DT","ggridges","ggthemes")
+packages <- c("plotly","readxl","flexdashboard","dplyr","ggplot2","sf","tmap","readr","DT","ggridges","ggthemes","knitr")
 if(!require(packages)){
     install.packages(packages)
 }
@@ -91,13 +91,16 @@ Bihar_assembly_map<-tm_shape(mapdata)+
   tm_borders(col="black",lwd=1,alpha = 1)+
   tm_fill(id="AC NAME", col =  "PARTY", alpha=1, palette = pal, legend.show = T,
           popup.vars = c("AC NAME", "CANDIDATE_NAME", "SEX","AGE", "CATEGORY",
-                         "PARTY", "% VOTES POLLED" ))+tm_text("AC NAME")+
+                         "PARTY", "% VOTES POLLED" ))+tm_text("AC NAME", size=0.6)+
+
   #tm_layout(style="cat", aes.palette = "Reds", aes.color = "Reds" )+
   #other customization
   #tm_borders(col="white",lwd=0.2)+
-  tm_layout(frame = T, outer.margins = 0, inner.margins = 0)+
+  #tm_layout(frame = T, outer.margins = 0, inner.margins = 0)+
   #tm_style("cobalt")+
-  tm_view(set.view = 8, alpha = 0.9, set.zoom.limits=c(7,11),view.legend.position=c("left","bottom") )
+  tm_view(set.view = 8, alpha = 0.9, set.zoom.limits=c(7,11))+
+  tm_legend(legend.outside=T,legend.outside.position=c("right","top"),title="Bihar Assembly Election (Wining Candidates)" )
+
 ```
 
 ```{r interective-map, echo=FALSE, message=FALSE, warning=FALSE,out.width="100%", out.height="100%"}
@@ -116,8 +119,7 @@ win_data_temp <- dataset3 %>% group_by(`AC NO.`) %>% filter(TOTAL==max(TOTAL))
 colnames(win_data_temp)[colnames(win_data_temp)=="AC NO."]<-"AC_NO"
 colnames(win_data_temp)[colnames(win_data_temp)=="CANDIDATE NAME"]<-"CANDIDATE_NAME"
 win_data_temp = as.data.frame(win_data_temp)
-DT::datatable(win_data_temp,options = list(
-  auto = 10, autoWidth = TRUE
+DT::datatable(win_data_temp,options = list(pageLength=20, scrollY=F
 ))
 ```
 
@@ -131,7 +133,8 @@ DT::datatable(win_data_temp,options = list(
 #Number of Candidates Fielded by Canstituency
 AC_cand = table(dataset3$`AC NAME`)
 AC_cand = as.data.frame(AC_cand)
-DT::datatable(AC_cand)
+DT::datatable(AC_cand,options = list(pageLength=20, scrollY=F
+))
 ```
 
 ## Columns {data-width="333"}
@@ -140,14 +143,16 @@ DT::datatable(AC_cand)
 
 ```{r}
 #Number Of Candidates Fielded Party wise
-DT::datatable(as.data.frame(table(dataset3$PARTY)))
+DT::datatable(as.data.frame(table(dataset3$PARTY)),options = list( scrollY=F
+))
 ```
 
 ### Winning Candidates party wise
 
 ```{r}
 #Winning Candidates party wise
-DT::datatable(as.data.frame(table(win_data_temp$PARTY)))
+DT::datatable(as.data.frame(table(win_data_temp$PARTY)),options = list(scrollY=F
+))
 ```
 
 ## Columns {data-width="333"}
@@ -158,7 +163,8 @@ DT::datatable(as.data.frame(table(win_data_temp$PARTY)))
 #Gender wie and partywise winning candidates
 #FEMALES
 win_data_temp_w <- win_data_temp %>% group_by(PARTY) %>% filter(SEX=="FEMALE")
-DT::datatable(as.data.frame(table(win_data_temp_w$PARTY)))
+DT::datatable(as.data.frame(table(win_data_temp_w$PARTY)),options = list(scrollY=F
+))
 ```
 
 ### Male winning candidates
@@ -166,7 +172,8 @@ DT::datatable(as.data.frame(table(win_data_temp_w$PARTY)))
 ```{r}
 #MALES
 win_data_temp_m <- win_data_temp %>% group_by(PARTY) %>% filter(SEX=="MALE")
-DT::datatable(as.data.frame(table(win_data_temp_m$PARTY)))
+DT::datatable(as.data.frame(table(win_data_temp_m$PARTY)),options = list( scrollY=F
+))
 
 ```
 
@@ -174,14 +181,14 @@ DT::datatable(as.data.frame(table(win_data_temp_m$PARTY)))
 
 ```{r}
 #Winning candidates Gender Wise
-table(win_data_temp$SEX)
+knitr::kable(as.data.frame(table(win_data_temp$SEX)))
 ```
 
 ### Winning Candidates Catagory wise
 
 ```{r}
 #Winning Candidates Catagory wise
-table(win_data_temp$CATEGORY)
+knitr::kable(as.data.frame(table(win_data_temp$CATEGORY)))
 ```
 
 # Plots
