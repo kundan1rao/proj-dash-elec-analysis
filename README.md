@@ -45,7 +45,7 @@ of winning candidates? Is there any geographic stronghood of any parties? etc.
 
 ![App Screenshot](Images\proj-img-bar-01.png)
 
-![App Screenshot](Images\proj-img-bar-021.png)
+![App Screenshot](Images\proj-img-bar-02.png)
 
 ![App Screenshot](Images\proj-map-stat-01.png)
 
