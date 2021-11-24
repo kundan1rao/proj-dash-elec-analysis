@@ -1,4 +1,11 @@
+# Live Dashboard
+## [visit dashboard](https://kundan1rao.github.io/proj-dash-elec-analysis/code.html)
+
+# Mywebsite
+## [https://kundanrao.netlify.app/](https://kundanrao.netlify.app/)
+
 # Bihar assembly election analysis
+
 
 This is a dashboard made with `Flexdboard` using `r programming`. in this dashboard i have 
 tried to get the insights of the election result and the participation of different section 
