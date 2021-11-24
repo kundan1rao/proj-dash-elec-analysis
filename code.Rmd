@@ -4,6 +4,7 @@ output:
   flexdashboard::flex_dashboard:
     orientation: columns
     social: menu
+    vertical_layout: fill
 ---
 
 ```{r setup, include=FALSE}
@@ -56,10 +57,10 @@ colnames(win_data_temp)[colnames(win_data_temp)=="CANDIDATE NAME"]<-"CANDIDATE_N
 
 ```
 
-# Interactive Maps
-
-## Column {data-width="1000"}
-
+Interactive Maps
+===============================================================================
+Column {data-width="1000"}
+------------------------------------------------------------------------------
 ```{r, echo=FALSE}
 
 shape_data<-read_sf("Shape file/INDIA_AC.shp")
@@ -107,11 +108,13 @@ Bihar_assembly_map<-tm_shape(mapdata)+
 Bihar_assembly_map
 ```
 
-# Winning Candidates
+Winning Candidates
+==============================================================================
 
-## Column {data-width="1000"}
+Column {data-width="1000"}
+------------------------------------------------------------------------------
 
-### Winning Candidates data
+### **Winning Candidates data**
 
 ```{r,echo=F,out.width="100%",out.height="100%"}
 #Winning Candidates data
@@ -119,83 +122,85 @@ win_data_temp <- dataset3 %>% group_by(`AC NO.`) %>% filter(TOTAL==max(TOTAL))
 colnames(win_data_temp)[colnames(win_data_temp)=="AC NO."]<-"AC_NO"
 colnames(win_data_temp)[colnames(win_data_temp)=="CANDIDATE NAME"]<-"CANDIDATE_NAME"
 win_data_temp = as.data.frame(win_data_temp)
-DT::datatable(win_data_temp,options = list(pageLength=20, scrollY=F
-))
+DT::datatable(win_data_temp,options = list(pageLength=20, scrollY=F),colnames=c("GENDER"="SEX", "STATE"="STATE/UT NAME"))
 ```
 
-# Data Summary
+Data Summary
+==============================================================================
 
-## Columns {data-width="333"}
+Columns {data-width="300"}
+------------------------------------------------------------------------------
 
-### Number of Candidates Fielded by Canstituency
+### **Number of Candidates Fielded by Canstituency**
 
 ```{r}
 #Number of Candidates Fielded by Canstituency
 AC_cand = table(dataset3$`AC NAME`)
 AC_cand = as.data.frame(AC_cand)
-DT::datatable(AC_cand,options = list(pageLength=20, scrollY=F
-))
+DT::datatable(AC_cand,options = list(pageLength=20, scrollY=F), colnames = c("ASSEMBLY CONSTITUENCY" = "Var1","CANDIDATES"="Freq"))
 ```
 
-## Columns {data-width="333"}
+Columns {data-width="300"}
+------------------------------------------------------------------------------
 
-### Number Of Candidates Fielded Party wise
+### **Number Of Candidates Fielded Party wise**
 
 ```{r}
 #Number Of Candidates Fielded Party wise
-DT::datatable(as.data.frame(table(dataset3$PARTY)),options = list( scrollY=F
-))
+DT::datatable(as.data.frame(table(dataset3$PARTY)),options = list( scrollY=F),colnames = c("PARTY" = "Var1","CANDIDATES"="Freq"))
 ```
 
-### Winning Candidates party wise
+### **Winning Candidates party wise**
 
 ```{r}
 #Winning Candidates party wise
-DT::datatable(as.data.frame(table(win_data_temp$PARTY)),options = list(scrollY=F
-))
+DT::datatable(as.data.frame(table(win_data_temp$PARTY)),options = list(scrollY=F),colnames = c("PARTY" = "Var1","CANDIDATES"="Freq"))
 ```
 
-## Columns {data-width="333"}
+Columns {data-width="300"}
+------------------------------------------------------------------------------
 
-### Female winning candidates
+### **Female winning candidates**
 
 ```{r}
 #Gender wie and partywise winning candidates
 #FEMALES
 win_data_temp_w <- win_data_temp %>% group_by(PARTY) %>% filter(SEX=="FEMALE")
-DT::datatable(as.data.frame(table(win_data_temp_w$PARTY)),options = list(scrollY=F
-))
+DT::datatable(as.data.frame(table(win_data_temp_w$PARTY)),options = list(scrollY=F),colnames = c("PARTY" = "Var1","CANDIDATES"="Freq"))
 ```
 
-### Male winning candidates
+### **Male winning candidates**
 
 ```{r}
 #MALES
 win_data_temp_m <- win_data_temp %>% group_by(PARTY) %>% filter(SEX=="MALE")
-DT::datatable(as.data.frame(table(win_data_temp_m$PARTY)),options = list( scrollY=F
-))
+DT::datatable(as.data.frame(table(win_data_temp_m$PARTY)),options = list( scrollY=F),colnames = c("PARTY" = "Var1","CANDIDATES"="Freq"))
 
 ```
 
-### Winning candidates Gender Wise
+Columns {data-width="100"}
+------------------------------------------------------------------------------
+
+### **Winning candidates Gender Wise**
 
 ```{r}
 #Winning candidates Gender Wise
-knitr::kable(as.data.frame(table(win_data_temp$SEX)))
+knitr::kable(as.data.frame(table(win_data_temp$SEX)),col.names = c("Gender","Candidates"))
 ```
 
-### Winning Candidates Catagory wise
+### **Winning Candidates Catagory wise**
 
 ```{r}
 #Winning Candidates Catagory wise
-knitr::kable(as.data.frame(table(win_data_temp$CATEGORY)))
+knitr::kable(as.data.frame(table(win_data_temp$CATEGORY)),col.names = c("Catogary","Candidates"))
 ```
 
-# Plots
+Plots
+=============================================================================
 
-## Column {data-width="333"}
-
-### Catagory wise plot
+Column {data-width="333"}
+---------------------------------------------------------------------------
+### **Catagory wise plot**
 
 ```{r}
 #Catagory wise plot
@@ -208,7 +213,7 @@ ggplotly(p1)
 
 ```
 
-### Gender Wise plot
+### **Gender Wise plot**
 
 ```{r}
 #Gender Wise plot
@@ -219,9 +224,9 @@ p2 <- ggplot(dataset3, aes(x = SEX,y = ..count../sum(..count..), fill=CATEGORY))
 ggplotly(p2)
 ```
 
-## Column {data-width="333"}
-
-### Age distribution Gender wise
+Column {data-width="333"}
+-----------------------------------------------------------------------------
+### **Age distribution Gender wise**
 
 ```{r}
 #Age distribution Gender wise
@@ -232,7 +237,7 @@ ggplotly(p3)
 
 ```
 
-### Age distribution category wise
+### **Age distribution category wise**
 
 ```{r}
 #Age distribution category wise
@@ -243,9 +248,10 @@ ggplotly(p4)
 
 ```
 
-## Column {data-width="333"}
+Column {data-width="333"}
+------------------------------------------------------------------------------
 
-### Age distribution of big parties (Boxplot)
+### **Age distribution of big parties (Boxplot)**
 
 ```{r}
 #Age distribution of big parties (Boxplot)
@@ -255,7 +261,7 @@ p5 <- ggplot(Big_party_data,aes(x=PARTY,y=AGE))+
 ggplotly(p5)
 ```
 
-### Age Distribution Of Big Parties (ridgesdensity plot)
+### **Age Distribution Of Big Parties (ridgesdensity plot)**
 
 ```{r, echo=FALSE,include=T,message=FALSE,error=F,warning=F}
 #Age Distribution Of Big Parties (ridgesdensity plot)
@@ -266,11 +272,12 @@ p6 <- ggplot(Big_party_data,aes(x=AGE,y=PARTY,fill=PARTY))+
 p6
 ```
 
-# Static maps
+Static maps
+==============================================================================
 
-## Columns {data-width="500"}
-
-### Male and Female Candidates
+Columns {data-width="500"}
+----------------------------------------------------------------------------
+### **Male and Female Candidates**
 
 ```{r}
 map_a <-ggplot(mapdata) +
@@ -286,9 +293,10 @@ map_a <-ggplot(mapdata) +
 map_a
 ```
 
-## Columns {data-width="500"}
+Columns {data-width="500"}
+----------------------------------------------------------------------------
 
-### Winning Candidates Party Wise
+### **Winning Candidates Party Wise**
 
 ```{r}
 map_b <- ggplot(mapdata) +
@@ -304,4 +312,60 @@ INC = "#E5E5E5", IND = "#BC06C5", `JD(U)` = "#8456C5", LJP = "#737373", RJD = "#
  theme(plot.caption = element_text(face = "italic"))
 
 map_b
+```
+
+Success Comparision Plot
+============================================================================
+
+Columns {data-width="500"}
+--------------------------------------------------------------------------
+
+```{r}
+#setup chunk
+win_data_temp_tbl <-as.data.frame(table(win_data_temp$PARTY)) %>% filter(Var1 !="IND")
+win_part <- win_data_temp_tbl$Var1
+
+
+```
+
+### **Winning Candidate Partywise**
+
+```{r}
+
+bar_a <- ggplot(win_data_temp_tbl) +
+  aes(x = Var1, weight = Freq) +
+  geom_bar(fill = "#370E21") +
+  labs(
+    x = "Party",
+    y = "No. Of Winning Candidate",
+    title = "Winning Candidates",
+    subtitle = "Winning Candidates Partywise inclusing Independent Candidates",
+    caption = "Source: https://eci.gov.in/files/file/12787-bihar-legislative-election-2020/"
+  ) +
+  ggthemes::theme_wsj()
+ggplotly(bar_a)
+```
+
+
+Columns {data-width="500"}
+---------------------------------------------------------------------------
+
+### **Candidate Fielded Partywise**
+
+```{r}
+dataset3 %>% filter(PARTY %in% win_part )%>% filter(PARTY != "IND")  -> Can_field_partywise
+Can_field_partywise=as.data.frame(table(Can_field_partywise$PARTY) )
+
+bar_b <- ggplot(Can_field_partywise) +
+  aes(x = Var1, weight = Freq) +
+  geom_bar(fill = "#370E21") +
+  labs(
+    x = "Party",
+    y = "Number Of Candidate Fielded",
+    title = "Number Of Candidate Fielded Partywise",
+    subtitle = "Fielded Candidates Partywise inclusing Independent Candidates",
+    caption = "Source: https://eci.gov.in/files/file/12787-bihar-legislative-election-2020/"
+  ) +
+  ggthemes::theme_wsj()
+ggplotly(bar_b)
 ```
