@@ -58,6 +58,8 @@ of winning candidates? Is there any geographic stronghood of any parties? etc.
 
 ![App Screenshot](Images/proj-map-stat-02.png)
 
+![App Screenshot](Images/proj-map-int-01.png)
+
 ![App Screenshot](Images/proj-plot-age-01.png)
 
 ![App Screenshot](Images/proj-plot-age-02.png)
