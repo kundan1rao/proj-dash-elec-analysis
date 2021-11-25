@@ -8,7 +8,7 @@ output:
 ---
 
 ```{r setup, include=FALSE}
-packages <- c("plotly","readxl","flexdashboard","dplyr","ggplot2","sf","tmap","readr","DT","ggridges","ggthemes","knitr")
+packages <- c("plotly","readxl","flexdashboard","dplyr","ggplot2","sf","tmap","readr","DT","ggridges","ggthemes","knitr","rAmCharts")
 if(!require(packages)){
     install.packages(packages)
 }
@@ -56,6 +56,23 @@ colnames(win_data_temp)[colnames(win_data_temp)=="AC NO."]<-"AC_NO"
 colnames(win_data_temp)[colnames(win_data_temp)=="CANDIDATE NAME"]<-"CANDIDATE_NAME"
 
 ```
+Winning Candidates
+==============================================================================
+
+Column {data-width="1000"}
+------------------------------------------------------------------------------
+
+### **Winning Candidates data**
+
+```{r,echo=F,out.width="100%",out.height="100%"}
+#Winning Candidates data
+win_data_temp <- dataset3 %>% group_by(`AC NO.`) %>% filter(TOTAL==max(TOTAL))
+colnames(win_data_temp)[colnames(win_data_temp)=="AC NO."]<-"AC_NO"
+colnames(win_data_temp)[colnames(win_data_temp)=="CANDIDATE NAME"]<-"CANDIDATE_NAME"
+win_data_temp = as.data.frame(win_data_temp)
+DT::datatable(win_data_temp,options = list(pageLength=20, scrollY=F),colnames=c("GENDER"="SEX", "STATE"="STATE/UT NAME"))
+```
+
 
 Interactive Maps
 ===============================================================================
@@ -108,22 +125,7 @@ Bihar_assembly_map<-tm_shape(mapdata)+
 Bihar_assembly_map
 ```
 
-Winning Candidates
-==============================================================================
 
-Column {data-width="1000"}
-------------------------------------------------------------------------------
-
-### **Winning Candidates data**
-
-```{r,echo=F,out.width="100%",out.height="100%"}
-#Winning Candidates data
-win_data_temp <- dataset3 %>% group_by(`AC NO.`) %>% filter(TOTAL==max(TOTAL))
-colnames(win_data_temp)[colnames(win_data_temp)=="AC NO."]<-"AC_NO"
-colnames(win_data_temp)[colnames(win_data_temp)=="CANDIDATE NAME"]<-"CANDIDATE_NAME"
-win_data_temp = as.data.frame(win_data_temp)
-DT::datatable(win_data_temp,options = list(pageLength=20, scrollY=F),colnames=c("GENDER"="SEX", "STATE"="STATE/UT NAME"))
-```
 
 Data Summary
 ==============================================================================
@@ -322,8 +324,10 @@ Columns {data-width="500"}
 
 ```{r}
 #setup chunk
+#candidates won partywise without independent candidates
 win_data_temp_tbl <-as.data.frame(table(win_data_temp$PARTY)) %>% filter(Var1 !="IND")
-win_part <- win_data_temp_tbl$Var1
+colnames(win_data_temp_tbl)<-c("PARTY","CANDIDATES WON")
+win_part <- win_data_temp_tbl$PARTY
 
 
 ```
@@ -333,7 +337,7 @@ win_part <- win_data_temp_tbl$Var1
 ```{r}
 
 bar_a <- ggplot(win_data_temp_tbl) +
-  aes(x = Var1, weight = Freq) +
+  aes(x = PARTY, weight = `CANDIDATES WON`) +
   geom_bar(fill = "#370E21") +
   labs(
     x = "Party",
@@ -347,17 +351,17 @@ ggplotly(bar_a)
 ```
 
 
-Columns {data-width="500"}
----------------------------------------------------------------------------
 
 ### **Candidate Fielded Partywise**
 
 ```{r}
+#candidates fielded partywise without independent candidates
 dataset3 %>% filter(PARTY %in% win_part )%>% filter(PARTY != "IND")  -> Can_field_partywise
 Can_field_partywise=as.data.frame(table(Can_field_partywise$PARTY) )
+colnames(Can_field_partywise) <- c("PARTY","CANDIDATES CONTESTED")
 
 bar_b <- ggplot(Can_field_partywise) +
-  aes(x = Var1, weight = Freq) +
+  aes(x = PARTY, weight = `CANDIDATES CONTESTED`) +
   geom_bar(fill = "#370E21") +
   labs(
     x = "Party",
@@ -368,4 +372,63 @@ bar_b <- ggplot(Can_field_partywise) +
   ) +
   ggthemes::theme_wsj()
 ggplotly(bar_b)
+```
+
+Columns {data-width="500"}
+-----------------------------------------------------------------------------
+
+### ***Candidates Won Partywise (Pie chart)***
+```{r,out.width="100%", out.height="100%"}
+library(rAmCharts)
+amPieChart(valueField = 'CANDIDATES WON', titleField = 'PARTY',
+           theme = "light", dataProvider = win_data_temp_tbl) %>%
+  setLegend(position = "bottom", useMarkerColorForLabels = TRUE)%>%
+   addListener(name = "clickSlice", expression = paste("function (event) {",
+                                                      "var obj = event.dataItem;",
+                                                      "alert('Candidates Won: ' + obj.value);",
+                                                      "}"))%>%
+  plot()
+```
+
+
+### ***Candidates Fielded Partywise (Pie chart)***
+```{r }
+amPieChart(valueField = 'CANDIDATES CONTESTED', titleField = 'PARTY',
+           theme = "light", dataProvider = Can_field_partywise) %>%
+  setLegend(position = "bottom", useMarkerColorForLabels = TRUE)%>%
+  addListener(name = "pullOutSlice", expression = paste("function (event) {",
+                                                      "var obj = event.dataItem;",
+                                                      "alert('Candidates Contested: ' + obj.value);",
+                                                      "}"))%>%
+  plot()
+```
+
+VOTE SHARE PLOT
+============================================================================
+
+Columns {data-width="1000"}
+--------------------------------------------------------------------------
+
+### ***Party Performance***
+```{r}
+Perform_data = cbind(Can_field_partywise,win_data_temp_tbl,by="PARTY")
+amSerialChart(dataProvider = Perform_data, categoryField = 'PARTY',
+              creditsPosition =  "bottom-right",theme = "light")%>%
+  addGraph(valueField = "CANDIDATES WON", title = "Winning candidates")%>%
+  addGraph(valueField = "CANDIDATES CONTESTED", title = "Candidates Contested")%>%
+  setLegend(position = "bottom", useMarkerColorForLabels = TRUE)
+  # we use the setter 'add' since the property titles is an array of 'Title' objects"
+
+```
+
+Other Plot
+============================================================================
+
+Columns {data-width="1000"}
+--------------------------------------------------------------------------
+
+### ***Layered barplot***
+```{r}
+amBarplot(x = "PARTY", y = c("CANDIDATES CONTESTED","CANDIDATES WON"), data = Perform_data, horiz = F,show_values = T,layered = T)
+
 ```
