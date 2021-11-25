@@ -50,6 +50,14 @@ of winning candidates? Is there any geographic stronghood of any parties? etc.
 
 # Snapes of plots and maps
 
+![App Screenshot](Images/proj-pie-01.png)
+
+![App Screenshot](Images/proj-pie-02.png)
+
+![App Screenshot](Images/proj-bar-01.png)
+
+![App Screenshot](Images/proj-bar-02.png)
+
 ![App Screenshot](Images/proj-img-bar-01.png)
 
 ![App Screenshot](Images/proj-img-bar-02.png)
